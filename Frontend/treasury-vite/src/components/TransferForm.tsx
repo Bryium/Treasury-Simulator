@@ -1,73 +1,123 @@
 import React, { useState } from "react";
 import { postTransfer } from "../api";
 
-type Props = {
-  accounts: { id: number; name: string; currency: string; balance: number }[];
-  onTransfer: () => void;
+type Account = {
+  id: number;
+  name: string;
+  currency: string;
+  balance: number;
 };
 
-export const TransferForm = ({ accounts, onTransfer }: Props) => {
-  const [src, setSrc] = useState(0);
-  const [dst, setDst] = useState(0);
+export const TransferForm = ({
+  accounts,
+  onTransfer,
+}: {
+  accounts: Account[];
+  onTransfer: () => void;
+}) => {
+  const [sourceId, setSourceId] = useState("");
+  const [destinationId, setDestinationId] = useState("");
   const [amount, setAmount] = useState(0);
   const [note, setNote] = useState("");
-  const [date, setDate] = useState("");
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (src === dst) return alert("Cannot transfer to same account");
-    const source = accounts.find((a) => a.id === src);
-    if (source && source.balance < amount) return alert("Insufficient funds");
-    await postTransfer({
-      src_id: src,
-      dst_id: dst,
-      amount,
-      note,
-      scheduled_date: date,
-    });
-    onTransfer();
+    if (!sourceId || !destinationId || amount <= 0) {
+      alert("All fields are required.");
+      return;
+    }
+    if (sourceId === destinationId) {
+      alert("Source and destination accounts must be different.");
+      return;
+    }
+
+    try {
+      await postTransfer({
+        source_id: Number(sourceId),
+        destination_id: Number(destinationId),
+        amount,
+        note,
+      });
+
+      // Reset form
+      setSourceId("");
+      setDestinationId("");
+      setAmount(0);
+      setNote("");
+      onTransfer();
+    } catch (error) {
+      console.error("Transfer failed", error);
+      alert("Transfer failed. Check balances or server connection.");
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <select value={src} onChange={(e) => setSrc(+e.target.value)}>
-        <option value={0}>Select source account</option>
-        {accounts.map((a) => (
-          <option key={a.id} value={a.id}>
-            {a.name}
-          </option>
-        ))}
-      </select>
-      <select value={dst} onChange={(e) => setDst(+e.target.value)}>
-        <option value={0}>Select destination account</option>
-        {accounts.map((a) => (
-          <option key={a.id} value={a.id}>
-            {a.name}
-          </option>
-        ))}
-      </select>
-      <input
-        type="number"
-        placeholder="Amount"
-        value={amount}
-        onChange={(e) => setAmount(+e.target.value)}
-      />
-      <input
-        type="text"
-        placeholder="Note"
-        value={note}
-        onChange={(e) => setNote(e.target.value)}
-      />
-      <input
-        type="date"
-        value={date}
-        onChange={(e) => setDate(e.target.value)}
-      />
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4 max-w-md mx-auto bg-white p-6 shadow rounded"
+    >
+      <div>
+        <label className="block mb-1 font-medium">Source Account</label>
+        <select
+          value={sourceId}
+          onChange={(e) => setSourceId(e.target.value)}
+          className="w-full border px-3 py-2 rounded"
+          required
+        >
+          <option value="">Select Source</option>
+          {accounts.map((acc) => (
+            <option key={acc.id} value={acc.id}>
+              {acc.name} ({acc.currency})
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <label className="block mb-1 font-medium">Destination Account</label>
+        <select
+          value={destinationId}
+          onChange={(e) => setDestinationId(e.target.value)}
+          className="w-full border px-3 py-2 rounded"
+          required
+        >
+          <option value="">Select Destination</option>
+          {accounts.map((acc) => (
+            <option key={acc.id} value={acc.id}>
+              {acc.name} ({acc.currency})
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <label className="block mb-1 font-medium">Amount</label>
+        <input
+          type="number"
+          value={amount}
+          onChange={(e) => setAmount(+e.target.value)}
+          className="w-full border px-3 py-2 rounded"
+          min="0.01"
+          step="0.01"
+          required
+        />
+      </div>
+
+      <div>
+        <label className="block mb-1 font-medium">Note (optional)</label>
+        <input
+          type="text"
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          className="w-full border px-3 py-2 rounded"
+        />
+      </div>
+
       <button
         type="submit"
-        className="bg-blue-500 text-white px-4 py-2 rounded"
+        className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
       >
-        Transfer
+        Submit Transfer
       </button>
     </form>
   );

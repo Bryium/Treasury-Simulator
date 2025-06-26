@@ -1,13 +1,23 @@
-fx_rates = {
-    ("USD", "KES"): 140.0,
-    ("KES", "USD"): 1 / 140.0,
-    ("USD", "NGN"): 1500.0,
-    ("NGN", "USD"): 1 / 1500.0,
-    ("KES", "NGN"): 10.5,
-    ("NGN", "KES"): 1 / 10.5,
+exchange_rates = {
+    "KES": {
+        "USD": 1 / 129.04,
+        "NGN": 11.92
+    },
+    "USD": {
+        "KES": 129.04,
+        "NGN": 1543.74
+    },
+    "NGN": {
+        "USD": 1 / 1543.74,
+        "KES": 1 / 11.92
+    }
 }
 
 def convert_currency(amount, from_currency, to_currency):
     if from_currency == to_currency:
         return amount
-    return amount * fx_rates.get((from_currency, to_currency), 1)
+    try:
+        rate = exchange_rates[from_currency][to_currency]
+        return amount * rate
+    except KeyError:
+        raise ValueError("Unsupported currency conversion")

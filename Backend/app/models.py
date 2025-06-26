@@ -1,11 +1,11 @@
 from . import db
 from datetime import datetime
 
-class Account(db.Model):
+class VirtualAccount(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), unique=True, nullable=False)
-    currency = db.Column(db.String(10), nullable=False)
-    balance = db.Column(db.Float, nullable=False, default=0.0)
+    name = db.Column(db.String(50), unique=True, nullable=False)
+    currency = db.Column(db.String(3), nullable=False)
+    balance = db.Column(db.Float, nullable=False)
 
 class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -15,3 +15,6 @@ class Transaction(db.Model):
     currency = db.Column(db.String(10), nullable=False)
     note = db.Column(db.String(255))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<VirtualAccount {self.name} - {self.currency}: {self.balance}>"
