@@ -3,7 +3,7 @@ from .models import VirtualAccount, Transaction
 from . import db
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
-from .utils import convert_currency  # Fixed import for package-relative
+from .utils import convert_currency
 
 treasury = Blueprint('treasury', __name__)
 
@@ -29,8 +29,8 @@ def get_accounts():
 def transfer():
     data = request.get_json()
 
-    source_name = data.get('source')
-    target_name = data.get('target')
+    source_name = data.get('from_account')
+    target_name = data.get('to_account')
     amount = data.get('amount')
     note = data.get('note', '')
 
