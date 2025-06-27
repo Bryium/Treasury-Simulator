@@ -1,5 +1,5 @@
 // src/api/api.ts
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:5000";
 
 export const fetchAccounts = async () =>
   fetch(`${BASE_URL}/api/accounts`).then((res) => res.json());
