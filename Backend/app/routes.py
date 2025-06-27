@@ -7,6 +7,11 @@ from .utils import convert_currency
 
 treasury = Blueprint('treasury', __name__)
 
+# ✅ Health check or root endpoint
+@treasury.route('/', methods=['GET'])
+def index():
+    return jsonify({"message": "Treasury backend is running!"})
+
 # ✅ Get all accounts
 @treasury.route('/accounts', methods=['GET'])
 def get_accounts():
